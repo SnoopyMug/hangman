@@ -1,72 +1,87 @@
-use crossterm::{
-    cursor, event::{self, KeyCode}, execute, terminal,
-    ExecutableCommand
-};
-use std::io::{self, Write};
+use std::io::{self};
+
+fn print_head(m: usize) -> String
+{
+    let s: String = String::from("O");
+
+    if m >= 1{
+        return s;
+    }
+    else{
+        return String::from("");
+    }
+}
+
+fn random_word() -> Vec<char>
+{
+    let word: String = String::from("hello");
+    return word.chars().collect();
+}
+
+fn build_guess(n: usize) -> Vec<char>
+{
+    let mut guess: Vec<char> = Vec::new();
+    let mut count: usize = 0;
+    while count < n {
+        guess.push('_');
+        count += 1;
+    }
+    
+    return guess;
+}
+
+fn check_guess(input: &str, guesses:&mut Vec<char>, word: &Vec<char>)
+{
+    for n in 0..word.len()
+    {
+        if input.chars().next() == Some(word[n])
+        {
+            guesses[n] = word[n];
+        }
+    }    
+
+    let word_string: String = word.into_iter().collect();
+    let guesses_string: String = guesses.iter().collect();
+
+    if input == word_string || guesses_string == word_string
+    {
+        *guesses = word.clone();
+        println!("You win!")
+    }
+
+}
 
 fn main() -> io::Result<()> {
     println!("Hello, world!");
-    let options = vec!["option 1", "option 2", "option 3"];
-    let mut selected_index = 0;
 
-    let mut stdout = io::stdout();
-    terminal::enable_raw_mode().unwrap();
-
+    let mut input: String = String::new();
+    let word: Vec<char> = random_word();
+    let mut guess: Vec<char> = build_guess(word.len());
+    let mut mistakes: Vec<String> = Vec::new();
     loop{
-        stdout.execute(terminal::Clear(terminal::ClearType::All)).unwrap();
-        stdout.execute(cursor::MoveTo(0,0)).unwrap();
-
-        for (i, option) in options.iter().enumerate() {
-            if i == selected_index {
-                println!("> {} <", option); // selected options
-            }
-            else {
-                println!("{}", option); // non selected options
-            }
-        }
-
-    stdout.flush().unwrap();
-
-    if event::poll(std::time::Duration::from_millis(100)).unwrap(){ // check every 100 seconds
-        if let event::Event::Key(key_event) = event::read().unwrap() {
-            match key_event.code{
-
-                KeyCode::Up => {
-                    if selected_index > 0{
-                        selected_index -= 1;
-                    }
-                }
-                KeyCode::Down => {
-                    if selected_index < options.len() - 1 {
-                        selected_index += 1;
-                    }
-                }
-                KeyCode::Esc => break,
-                KeyCode::Enter => {
-                    println!("\n{} selected", options[selected_index]);
-                    break;
-                }
-                _ => {}
-                }
-            }
-        }
-    }
-
-    terminal::disable_raw_mode().unwrap();
-    /*let mut input = String::new();
-    loop{
-        println!("Select an option");
+        println!("---------");
+        println!("|       |");
+        println!("|       {}", print_head(mistakes.len()));
+        println!("|");
+        println!("|");
+        println!("|");
+        println!("|");
+        println!("|");
+        println!("---------");  
+        let guess_string: String = guess.clone().into_iter().collect();
+        println!("\n{}", guess_string);
+        println!("Type a letter or word");
         
-        println!("e - Exit")
         io::stdin().read_line(&mut input)?;
         match input.trim() {
             "exit" => break,
             _ => {// Any input
                 println!("You typed: {}", input.trim());
+                check_guess(input.trim(), &mut guess, &word);
             },
         }
         input.clear();
     }
-    */
+    
     Ok(()) // Explicitly needed because of Result
 }
