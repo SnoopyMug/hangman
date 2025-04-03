@@ -109,15 +109,18 @@ fn main() -> io::Result<()> {
             GameState::End => {
                 println!("Type 'exit' to exit or any key to restart");
                 io::stdin().read_line(&mut input)?;
-                answer.clear();
-                answer = random_answer();
-                guess.clear();
-                guess  = build_guess(answer.len());
-                mistakes.clear();
-                cur_state = GameState::InProgress;
                 if input.trim() == "exit"
                 {
                     break; // Exit the loop to make Ok(()) reachable
+                }
+                else
+                {
+                    answer.clear();
+                    answer = random_answer();
+                    guess.clear();
+                    guess  = build_guess(answer.len());
+                    mistakes.clear();
+                    cur_state = GameState::InProgress;
                 }
             }  
         }
