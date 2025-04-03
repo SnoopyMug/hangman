@@ -1,21 +1,9 @@
 use std::io::{self};
 
-fn print_head(m: usize) -> String
+fn random_answer() -> Vec<char>
 {
-    let s: String = String::from("O");
-
-    if m >= 1{
-        return s;
-    }
-    else{
-        return String::from("");
-    }
-}
-
-fn random_word() -> Vec<char>
-{
-    let word: String = String::from("hello");
-    return word.chars().collect();
+    let answer: String = String::from("hello");
+    return answer.chars().collect();
 }
 
 fn build_guess(n: usize) -> Vec<char>
@@ -30,56 +18,110 @@ fn build_guess(n: usize) -> Vec<char>
     return guess;
 }
 
-fn check_guess(input: &str, guesses:&mut Vec<char>, word: &Vec<char>)
+fn print_mistakes(mistakes: &Vec<String>) -> String
 {
-    for n in 0..word.len()
+    let mut s: String = String::from("");
+    for n in mistakes
     {
-        if input.chars().next() == Some(word[n])
+        s = s + &n + " ";
+    }
+
+    return s;
+
+}
+
+fn check_guess(input: &str, guesses:&mut Vec<char>, answer: &Vec<char>, mistakes:&mut Vec<String>)
+{
+    let mut mistake: bool = true;
+    for n in 0..answer.len()
+    { //Iterate over each character of the answer
+        if input.chars().next() == Some(answer[n])
         {
-            guesses[n] = word[n];
+            mistake = false;
+            guesses[n] = answer[n];
         }
+
     }    
 
-    let word_string: String = word.into_iter().collect();
-    let guesses_string: String = guesses.iter().collect();
 
-    if input == word_string || guesses_string == word_string
+
+    if mistake == true
     {
-        *guesses = word.clone();
-        println!("You win!")
+        mistakes.push(input.to_string());
     }
 
 }
 
-fn main() -> io::Result<()> {
-    println!("Hello, world!");
+enum GameState
+{
+    InProgress,
+    End,
+}
 
+fn main() -> io::Result<()> {
     let mut input: String = String::new();
-    let word: Vec<char> = random_word();
-    let mut guess: Vec<char> = build_guess(word.len());
+    let mut answer: Vec<char> = random_answer();
+    let mut guess: Vec<char> = build_guess(answer.len());
     let mut mistakes: Vec<String> = Vec::new();
+    let mut cur_state: GameState = GameState::InProgress;
     loop{
+
+        let ml: usize = mistakes.len();
+        let answer_string: String = answer.iter().collect();
+        let guesses_string: String = guess.iter().collect();
+
+        if (input == answer_string || guesses_string == answer_string) ||
+           (ml >= 6)
+        {
+            cur_state = GameState::End;
+        }
         println!("---------");
         println!("|       |");
-        println!("|       {}", print_head(mistakes.len()));
-        println!("|");
-        println!("|");
+        println!("|       {}", if ml >= 1 {"0"} else {""}); // We want to check a range for the size
+        println!("|      {}", if ml == 2 {" |"} 
+                              else if ml == 3 {"/|"}
+                              else if ml >= 4 {"/|\\"}
+                              else {""}
+                            );
+        println!("|      {}", if ml == 5 {"/"}
+                              else if ml >= 6 {" /\\"}
+                              else {""}
+                            );
         println!("|");
         println!("|");
         println!("|");
         println!("---------");  
         let guess_string: String = guess.clone().into_iter().collect();
         println!("\n{}", guess_string);
-        println!("Type a letter or word");
+        println!("MISTAKES: {}", print_mistakes(&mistakes));
+        println!("{}", if guess_string == answer_string {"YOU WIN!"} 
+                        else if ml >= 6 {"YOU LOSE!"}
+                        else {"Please type a letter"}
+                        );
         
-        io::stdin().read_line(&mut input)?;
-        match input.trim() {
-            "exit" => break,
-            _ => {// Any input
+
+        match cur_state {
+            GameState::InProgress => { 
+                io::stdin().read_line(&mut input)?;
                 println!("You typed: {}", input.trim());
-                check_guess(input.trim(), &mut guess, &word);
+                check_guess(input.trim(), &mut guess, &answer, &mut mistakes);
             },
+            GameState::End => {
+                println!("Type 'exit' to exit or any key to restart");
+                io::stdin().read_line(&mut input)?;
+                answer.clear();
+                answer = random_answer();
+                guess.clear();
+                guess  = build_guess(answer.len());
+                mistakes.clear();
+                cur_state = GameState::InProgress;
+                if input.trim() == "exit"
+                {
+                    break; // Exit the loop to make Ok(()) reachable
+                }
+            }  
         }
+        
         input.clear();
     }
     
