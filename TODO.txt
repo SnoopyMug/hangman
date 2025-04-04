@@ -1,1 +1,3 @@
-1. Add dictionary function to select a random word
+# Add bevy support and make this an actual game
+# Refactor functions into modules
+# Add more unit tests and integration tests
