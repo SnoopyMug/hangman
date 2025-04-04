@@ -1,9 +1,33 @@
 use std::io::{self};
+use std::fs::read_to_string;
+use rand::seq::IndexedRandom;
+use rand::rng;
+
+fn read_lines(filename: &str) -> Vec<String>
+{
+    return read_to_string(filename)
+        .unwrap() // panic on possible file read errors
+        .lines() // split the string into an iterator of string slices
+        .map(String::from) // make each slice into a string
+        .collect() //gather into a vector
+}
 
 fn random_answer() -> Vec<char>
 {
-    let answer: String = String::from("hello");
-    return answer.chars().collect();
+    let dictionary_file: &str = "assets/words.txt";
+    let dictionary: Vec<String> = read_lines(dictionary_file);
+    
+    let mut rng = rng(); // random number
+
+    if let Some(random_value) = dictionary.choose(&mut rng) 
+    {
+        return random_value.chars().collect();
+    }
+    else 
+    {
+        println!("Word is empty!");
+        return Vec::new();
+    }
 }
 
 fn build_guess(n: usize) -> Vec<char>
