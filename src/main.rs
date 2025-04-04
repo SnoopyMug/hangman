@@ -116,11 +116,11 @@ fn main() -> io::Result<()> {
         println!("|");
         println!("---------");  
         let guess_string: String = guess.clone().into_iter().collect();
-        println!("\n{}", guess_string);
+        println!("\nYOUR ANSWER: {}", guess_string);
         println!("MISTAKES: {}", print_mistakes(&mistakes));
-        println!("{}", if guess_string == answer_string {"YOU WIN!"} 
-                        else if ml >= 6 {"YOU LOSE!"}
-                        else {"Please type a letter"}
+        println!("{}", if guess_string == answer_string {"YOU WIN!".to_string()} 
+                        else if ml >= 6 {format!("YOU LOSE! The answer was {}", answer_string)}
+                        else {"Please type a letter".to_string()}
                         );
         
 
